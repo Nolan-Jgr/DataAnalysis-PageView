@@ -15,7 +15,7 @@ df = df.loc[(df['value'] >= df['value'].quantile(0.025))&
 def draw_line_plot():
     # Draw line plot
     fig, ax = plt.subplots(figsize=(16,6))
-    ax = sns.lineplot(data=df, x ='date',y='value')
+    ax = sns.lineplot(data=df, x ='date',y='value',color='#901cd4')
     ax.set(xlabel='Date', ylabel='Page Views',
            title='Daily freeCodeCamp Forum Page Views 5/2016-12/2019')
 
@@ -31,18 +31,16 @@ def draw_bar_plot():
     df_bar = df_bar.rename(columns={'value':'avg'})
     df_bar['Year'] = pd.DatetimeIndex(df['date']).year
     df_bar['Month'] = pd.DatetimeIndex(df['date']).month
-    print(df_bar)
     df_bar = df_bar.groupby(['Year', 'Month'], as_index=False,sort=False)['avg'].mean()
-    print(df_bar)
 
-    
     monthNames=['January', 'February', 'March', 'April', 'May', 'June', 'July', 
              'August', 'September', 'October', 'November', 'December']
     # Draw bar plot
     fig, ax = plt.subplots(figsize=(15,10))
-    ax = sns.barplot(data=df_bar,x='Year',y='avg',hue = 'Month',palette='tab10')
+    ax = sns.barplot(data=df_bar,x='Year',y='avg',hue = 'Month',palette='Set1')
     ax.set(xlabel='Years',ylabel='Average Page Views')
-    ax.legend(title='Months',labels=monthNames)
+    hands, labs = ax.get_legend_handles_labels()
+    ax.legend(handles=hands, labels=monthNames,fontsize=15)
 
     
     # Save image and return fig (don't change this part)
@@ -53,10 +51,28 @@ def draw_box_plot():
     # Prepare data for box plots (this part is done!)
     df_box = df.copy()
     df_box.reset_index(inplace=True)
-    df_box['year'] = [d.year for d in df_box.date]
-    df_box['month'] = [d.strftime('%b') for d in df_box.date]
+    # df_box['year'] = [d.year for d in df_box.date]
+    # df_box['month'] = [d.strftime('%b') for d in df_box.date]
+    df_box['Year'] = pd.DatetimeIndex(df['date']).year
+    df_box['Month'] = pd.DatetimeIndex(df['date']).month
+
+
 
     # Draw box plots (using Seaborn)
+    fig, (f1,f2) = plt.subplots(1,2,figsize=(16,10))
+
+    f1.set_title("Year-wise Box Plot(Trend)")
+    f1 = sns.boxplot(ax=f1,x='Year',y='value',data=df_box,hue='Year',palette='Set1',legend=False)
+    f1.set_xlabel("Year")
+    f1.set_ylabel("Page Views")
+
+    month_order = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    f2.set_title("Month-wise Box Plot (Seasonality)")
+    f2 = sns.boxplot(ax=f2,x='Month',y="value",data=df_box,hue='Month',palette='Set1',legend=False)
+    f2.set_xticks([1,2,3,4,5,6,7,8,9,10,11,12])
+    f2.set_xticklabels(month_order)
+    f2.set_xlabel("Month")
+    f2.set_ylabel("Page Views")
 
 
 
