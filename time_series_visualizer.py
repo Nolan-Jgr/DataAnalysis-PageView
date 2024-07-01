@@ -26,23 +26,17 @@ def draw_line_plot():
 
 def draw_bar_plot():
     # Copy and modify data for monthly bar plot
-    df_bar = df.copy()
-    df_bar = df_bar.reset_index()
-    df_bar = df_bar.rename(columns={'value':'avg'})
-    df_bar['Year'] = pd.DatetimeIndex(df['date']).year
-    df_bar['Month'] = pd.DatetimeIndex(df['date']).month
-    df_bar = df_bar.groupby(['Year', 'Month'], as_index=False,sort=False)['avg'].mean()
-
+    df_bar = df.copy().reset_index()
+    df_bar.date = pd.to_datetime(df_bar.date)
     monthNames=['January', 'February', 'March', 'April', 'May', 'June', 'July', 
              'August', 'September', 'October', 'November', 'December']
+    df_bar['Month'] = pd.Categorical(df_bar.date.dt.strftime('%B'), categories=monthNames, ordered=True)
+    df_bar = pd.pivot_table(data=df_bar, index=df_bar.date.dt.year, columns='Month', values='value',aggfunc='mean',observed=False)
     # Draw bar plot
     fig, ax = plt.subplots(figsize=(15,10))
-    ax = sns.barplot(data=df_bar,x='Year',y='avg',hue = 'Month',palette='Set1')
+    ax = df_bar.plot(ax=ax,kind='bar')
     ax.set(xlabel='Years',ylabel='Average Page Views')
-    hands, labs = ax.get_legend_handles_labels()
-    ax.legend(handles=hands, labels=monthNames,fontsize=15)
 
-    
     # Save image and return fig (don't change this part)
     fig.savefig('bar_plot.png')
     return fig
@@ -61,7 +55,7 @@ def draw_box_plot():
     # Draw box plots (using Seaborn)
     fig, (f1,f2) = plt.subplots(1,2,figsize=(16,10))
 
-    f1.set_title("Year-wise Box Plot(Trend)")
+    f1.set_title("Year-wise Box Plot (Trend)")
     f1 = sns.boxplot(ax=f1,x='Year',y='value',data=df_box,hue='Year',palette='Set1',legend=False)
     f1.set_xlabel("Year")
     f1.set_ylabel("Page Views")
